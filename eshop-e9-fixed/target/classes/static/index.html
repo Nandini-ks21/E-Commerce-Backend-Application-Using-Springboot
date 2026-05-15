@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ESHOP — Premium Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">◈</span>
+      <span class="brand-name">ESHOP</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">Shop</a>
+      <a href="admin.html" class="nav-link" id="adminNavLink" style="display:none">Admin</a>
+    </div>
+    <div class="nav-actions">
+      <!-- Cart Button -->
+      <button class="cart-nav-btn" onclick="openCartModal()" title="View Cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+      </button>
+
+      <div id="authButtons">
+        <button class="btn-ghost" onclick="openLoginModal()">Login</button>
+      </div>
+      <div id="userInfo" style="display:none">
+        <span class="user-badge" id="userBadge"></span>
+        <button class="btn-ghost" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <div class="hero-label">New Collection 2026</div>
+      <h1 class="hero-title">
+        Built on<br/>
+        <em>Quality</em>
+      </h1>
+      <p class="hero-sub">Premium products, handpicked for the discerning few.</p>
+      <button class="btn-primary" onclick="scrollToProducts()">Explore Products</button>
+    </div>
+    <div class="hero-ticker">
+      <div class="ticker-track">
+        <span>Free Shipping &nbsp;◈&nbsp; Premium Quality &nbsp;◈&nbsp; Secure Checkout &nbsp;◈&nbsp; 24/7 Support &nbsp;◈&nbsp; Free Shipping &nbsp;◈&nbsp; Premium Quality &nbsp;◈&nbsp; Secure Checkout &nbsp;◈&nbsp; 24/7 Support &nbsp;◈&nbsp;</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTERS -->
+  <section class="filters-section" id="products">
+    <div class="filters-bar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search products..." class="search-input" oninput="handleFilter()"/>
+      </div>
+      <input type="text" id="categoryInput" placeholder="Category" class="filter-input" oninput="handleFilter()"/>
+      <div class="price-range">
+        <span class="price-label">₹<span id="lowerVal">0</span></span>
+        <input type="range" id="lowerPrice" min="0" max="100000" value="0" step="100" oninput="updatePriceLabel(); handleFilter()"/>
+        <span>—</span>
+        <input type="range" id="higherPrice" min="0" max="100000" value="100000" step="100" oninput="updatePriceLabel(); handleFilter()"/>
+        <span class="price-label">₹<span id="higherVal">1,00,000</span></span>
+      </div>
+      <select id="sortSelect" class="filter-select" onchange="handleFilter()">
+        <option value="id">Sort: Default</option>
+        <option value="price">Price ↑</option>
+        <option value="price-desc">Price ↓</option>
+        <option value="name">Name A–Z</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- PRODUCTS GRID -->
+  <section class="products-section">
+    <div class="section-header">
+      <h2 class="section-title">All Products</h2>
+      <span class="product-count" id="productCount">— items</span>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <!-- injected by JS -->
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">◎</div>
+    <p>No products found</p>
+    <span>Try adjusting your filters</span>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- LOGIN MODAL -->
+  <div class="modal-overlay" id="loginModal" onclick="closeLoginModal(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeLoginModal()">✕</button>
+      <div class="modal-brand">◈ ESHOP</div>
+      <h2 class="modal-title">Welcome Back</h2>
+      <p class="modal-sub">Sign in to your account</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="admin@eshop.com" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" class="form-input"/>
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn-primary full-width" onclick="login()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="modal-overlay" id="productModal" onclick="closeProductModal(event)">
+    <div class="modal modal-wide">
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+      <div class="product-detail" id="productDetail"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       CART MODAL
+  ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="cartModal" onclick="closeCartModal(event)">
+    <div class="modal modal-cart">
+      <button class="modal-close" onclick="closeCartModal()">✕</button>
+      <div class="cart-modal-header">
+        <div class="modal-brand">◈ ESHOP</div>
+        <h2 class="modal-title">Your Cart</h2>
+      </div>
+      <div class="cart-items-list" id="cartItemsList"></div>
+      <div class="cart-summary" id="cartSummary" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       UPI PAYMENT MODAL
+  ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="upiModal" onclick="closeUpiModal(event)">
+    <div class="modal modal-upi">
+      <button class="modal-close" onclick="closeUpiModal()">✕</button>
+
+      <!-- Payment Form -->
+      <div id="upiPaymentForm">
+        <div class="upi-header">
+          <div class="modal-brand">◈ ESHOP</div>
+          <h2 class="modal-title">Secure Checkout</h2>
+          <p class="modal-sub">Pay instantly using UPI</p>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="upi-order-section">
+          <div class="upi-section-label">Order Summary</div>
+          <div class="upi-order-summary" id="upiOrderSummary"></div>
+          <div class="upi-total-row">
+            <span>Total Payable</span>
+            <span class="upi-total-val" id="upiTotalAmount"></span>
+          </div>
+        </div>
+
+        <!-- UPI Apps -->
+        <div class="upi-apps-section">
+          <div class="upi-section-label">Select Payment App</div>
+          <div class="upi-apps-grid">
+
+            <button class="upi-app-btn" onclick="selectUpiApp('GPay', this)">
+              <div class="upi-app-icon gpay-icon">
+                <svg viewBox="0 0 48 48" width="32" height="32">
+                  <path fill="#4285F4" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.9 6.1C12.8 13.2 17.9 9.5 24 9.5z"/>
+                  <path fill="#34A853" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.4c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.5-9.4 6.5-16.1z" opacity=".9"/>
+                  <path fill="#FBBC05" d="M10.9 28.6A14.6 14.6 0 019.5 24c0-1.6.3-3.2.8-4.6L2.4 13.3A23.9 23.9 0 000 24c0 3.9.9 7.5 2.5 10.7l8.4-6.1z"/>
+                  <path fill="#EA4335" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7-5.4c-2 1.4-4.6 2.2-8.2 2.2-6 0-11.1-4-12.9-9.5l-7.9 6.1C6.8 42.5 14.8 48 24 48z"/>
+                </svg>
+              </div>
+              <span class="upi-app-name">GPay</span>
+              <span class="upi-app-sub">Google Pay</span>
+            </button>
+
+            <button class="upi-app-btn" onclick="selectUpiApp('PhonePe', this)">
+              <div class="upi-app-icon phonepe-icon">
+                <svg viewBox="0 0 48 48" width="32" height="32">
+                  <rect width="48" height="48" rx="10" fill="#5f259f"/>
+                  <path fill="white" d="M24 8c-8.8 0-16 7.2-16 16s7.2 16 16 16c2.8 0 5.4-.7 7.7-2l-2.2-3.8c-1.6.9-3.4 1.4-5.5 1.4-6.1 0-11-4.9-11-11s4.9-11 11-11c4.1 0 7.7 2.2 9.7 5.5H30v4h8V15h-4c-2.5-4.2-7-7-11-7z"/>
+                </svg>
+              </div>
+              <span class="upi-app-name">PhonePe</span>
+              <span class="upi-app-sub">@ybl</span>
+            </button>
+
+            <button class="upi-app-btn" onclick="selectUpiApp('Paytm', this)">
+              <div class="upi-app-icon paytm-icon">
+                <svg viewBox="0 0 48 48" width="32" height="32">
+                  <rect width="48" height="48" rx="10" fill="#00BAF2"/>
+                  <rect x="8" y="20" width="32" height="8" rx="2" fill="white"/>
+                  <rect x="8" y="12" width="20" height="6" rx="2" fill="white"/>
+                </svg>
+              </div>
+              <span class="upi-app-name">Paytm</span>
+              <span class="upi-app-sub">@paytm</span>
+            </button>
+
+            <button class="upi-app-btn" onclick="selectUpiApp('BHIM', this)">
+              <div class="upi-app-icon bhim-icon">
+                <svg viewBox="0 0 48 48" width="32" height="32">
+                  <rect width="48" height="48" rx="10" fill="#00518C"/>
+                  <text x="24" y="31" text-anchor="middle" fill="white" font-size="14" font-weight="bold" font-family="sans-serif">BHIM</text>
+                </svg>
+              </div>
+              <span class="upi-app-name">BHIM</span>
+              <span class="upi-app-sub">@upi</span>
+            </button>
+
+            <button class="upi-app-btn" onclick="selectUpiApp('Amazon Pay', this)">
+              <div class="upi-app-icon amazon-icon">
+                <svg viewBox="0 0 48 48" width="32" height="32">
+                  <rect width="48" height="48" rx="10" fill="#FF9900"/>
+                  <text x="24" y="28" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="sans-serif">amazon</text>
+                  <text x="24" y="38" text-anchor="middle" fill="white" font-size="7" font-family="sans-serif">pay</text>
+                </svg>
+              </div>
+              <span class="upi-app-name">Amazon Pay</span>
+              <span class="upi-app-sub">@apl</span>
+            </button>
+
+            <button class="upi-app-btn" onclick="selectUpiApp('Other UPI', this)">
+              <div class="upi-app-icon other-icon">
+                <svg viewBox="0 0 48 48" width="32" height="32">
+                  <rect width="48" height="48" rx="10" fill="#1a1a2e"/>
+                  <text x="24" y="28" text-anchor="middle" fill="#c9a84c" font-size="10" font-weight="bold" font-family="sans-serif">UPI</text>
+                </svg>
+              </div>
+              <span class="upi-app-name">Other UPI</span>
+              <span class="upi-app-sub">Any bank</span>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- UPI ID Entry -->
+        <div class="upi-id-section" id="upiIdSection" style="display:none">
+          <div class="upi-section-label" id="upiIdLabel">Enter UPI ID</div>
+          <div class="upi-id-input-wrap">
+            <input type="text" class="form-input upi-id-input" id="upiIdInput"
+              placeholder="yourname@upi"
+              oninput="onUpiIdInput(this.value)"
+              autocomplete="off" spellcheck="false"/>
+          </div>
+          <div class="upi-status-msg" id="upiStatusMsg"></div>
+        </div>
+
+        <!-- Pay Button -->
+        <button class="btn-primary full-width upi-pay-btn" id="upiPayBtn" disabled onclick="confirmUpiPayment()">
+          Pay Now
+        </button>
+
+        <div class="upi-secure-note">
+          <span>🔒</span> 256-bit SSL encrypted &nbsp;·&nbsp; Powered by NPCI UPI
+        </div>
+      </div>
+
+      <!-- Success Screen -->
+      <div id="upiSuccessScreen" class="upi-success-screen" style="display:none">
+        <div class="upi-success-icon">✓</div>
+        <h2 class="upi-success-title">Payment Successful!</h2>
+        <p class="upi-success-sub">Your order has been placed and inventory updated.</p>
+        <div class="upi-success-details">
+          <div class="upi-success-row"><span>Payment via</span><span id="upiSuccessApp"></span></div>
+          <div class="upi-success-row"><span>UPI ID</span><span id="upiSuccessId"></span></div>
+          <div class="upi-success-row"><span>Transaction ID</span><span id="upiSuccessTxn" class="upi-txn"></span></div>
+        </div>
+        <button class="btn-primary full-width" onclick="closeUpiSuccess()">Continue Shopping</button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="brand-name footer-brand">◈ ESHOP</span>
+      <span class="footer-copy">© 2026 All rights reserved</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
